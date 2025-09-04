@@ -50,3 +50,8 @@ docker run -d --name fruits-frontend --network fruits-net -p 5173:5173
 4. Access the App
 Frontend: http://localhost:5173  
 Backend: http://localhost:8800
+
+
+**********************************
+This project reflects the first step in my DevOps journey and I am personally attached to it since it gave me the confidence to work with Docker.  
+I am still learning and exploring advanced concepts like Docker Compose and Swarm through another experimental project, which you can check here: [Voting App](https://github.com/Dev-Choudhary-0902/DevOps-Project2.git).
