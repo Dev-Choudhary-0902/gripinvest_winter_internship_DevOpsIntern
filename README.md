@@ -26,3 +26,28 @@ Key Learnings
 
 What it taught me?
 This project gave me practical exposure to Docker and DevOps fundamentals and helped me understand how to take an existing codebase and transform it into a portable, easily deployable application.
+
+How to Run (with Docker)
+
+1. Build Images
+docker build -t image1 ./backend
+docker build -t image ./frontend
+
+2. Create a Docker Network (for container communication)
+docker network create fruits-net
+
+3. Run Containers
+# Run backend container on port 8800 with MongoDB URL
+docker run -d --name fruits-backend --network fruits-net -p 8800:8800 \
+  -e URL="mongodb+srv://rajendra0968jangid:Rajendra0968@cluster0.wyu84.mongodb.net/myfruits" \
+  -e PORT=8800 \
+  image1
+
+# Run frontend container on port 5173 with backend URL
+docker run -d --name fruits-frontend --network fruits-net -p 5173:5173 \
+  -e VITE_BACKEND_URL=http://fruits-backend:8800 \
+  image
+
+4. Access the App
+Frontend: http://localhost:5173  
+Backend: http://localhost:8800
