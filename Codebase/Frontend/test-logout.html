@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Logout Functionality</title>
+</head>
+<body>
+    <h1>Test Logout Functionality</h1>
+    
+    <div>
+        <h2>Current Token Status:</h2>
+        <p id="token-status">Checking...</p>
+    </div>
+    
+    <div>
+        <h2>Test Logout:</h2>
+        <button onclick="testLogout()">Test Logout</button>
+    </div>
+    
+    <div>
+        <h2>Set Demo Token:</h2>
+        <button onclick="setDemoToken()">Set Demo Token</button>
+    </div>
+    
+    <script>
+        function checkTokenStatus() {
+            const token = localStorage.getItem('grip-invest-token');
+            const status = document.getElementById('token-status');
+            
+            if (token) {
+                status.textContent = `Token exists: ${token.substring(0, 20)}...`;
+                status.style.color = 'green';
+            } else {
+                status.textContent = 'No token found';
+                status.style.color = 'red';
+            }
+        }
+        
+        function testLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('grip-invest-token');
+                alert('Logged out successfully!');
+                checkTokenStatus();
+            }
+        }
+        
+        function setDemoToken() {
+            const demoToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlN2U2OTNiYi00ZjJmLTQ4NzItODY2MS1kZDIyNjI0MzRiMjYiLCJlbWFpbCI6ImRlbW9AZ21haWwuY29tIiwiaWF0IjoxNzU4MzA3NzgyLCJleHAiOjE3NTgzOTQxODJ9.259EOKPq7d7Ofw8YdXgR8bmENvF7ByAPYuyrZFn1GwA';
+            localStorage.setItem('grip-invest-token', demoToken);
+            checkTokenStatus();
+        }
+        
+        // Check token status on page load
+        checkTokenStatus();
+    </script>
+</body>
+</html>

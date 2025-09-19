@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Signup Flow</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .step { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Signup Flow</h1>
+        
+        <div class="step">
+            <h3>Step 1: Test Signup API</h3>
+            <div class="form-group">
+                <label>First Name:</label>
+                <input type="text" id="firstName" value="Test" />
+            </div>
+            <div class="form-group">
+                <label>Last Name:</label>
+                <input type="text" id="lastName" value="User" />
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="email" value="test@example.com" />
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="password" value="Test@1234" />
+            </div>
+            <div class="form-group">
+                <label>Risk Appetite:</label>
+                <select id="riskAppetite">
+                    <option value="low">Conservative</option>
+                    <option value="moderate" selected>Moderate</option>
+                    <option value="high">Aggressive</option>
+                </select>
+            </div>
+            <button onclick="testSignup()">Test Signup</button>
+            <div id="signupResult"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Test Profile API</h3>
+            <button onclick="testProfile()">Test Profile Data</button>
+            <div id="profileResult"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Test Token Management</h3>
+            <button onclick="checkToken()">Check Current Token</button>
+            <button onclick="clearToken()">Clear Token</button>
+            <div id="tokenResult"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testSignup() {
+            const resultDiv = document.getElementById('signupResult');
+            resultDiv.innerHTML = 'Testing signup...';
+            
+            try {
+                const response = await fetch('http://localhost:4000/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        firstName: document.getElementById('firstName').value,
+                        lastName: document.getElementById('lastName').value,
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value,
+                        riskAppetite: document.getElementById('riskAppetite').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('grip-invest-token', data.token);
+                    resultDiv.innerHTML = `<div class="success">✅ Signup successful! Token stored.</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Signup failed: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network error: ${error.message}</div>`;
+            }
+        }
+
+        async function testProfile() {
+            const resultDiv = document.getElementById('profileResult');
+            const token = localStorage.getItem('grip-invest-token');
+            
+            if (!token) {
+                resultDiv.innerHTML = '<div class="error">❌ No token found. Please signup first.</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = 'Testing profile API...';
+            
+            try {
+                const response = await fetch('http://localhost:4000/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ Profile data retrieved:<br><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Profile API failed: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network error: ${error.message}</div>`;
+            }
+        }
+
+        function checkToken() {
+            const resultDiv = document.getElementById('tokenResult');
+            const token = localStorage.getItem('grip-invest-token');
+            
+            if (token) {
+                resultDiv.innerHTML = `<div class="success">✅ Token found: ${token.substring(0, 50)}...</div>`;
+            } else {
+                resultDiv.innerHTML = '<div class="error">❌ No token found</div>';
+            }
+        }
+
+        function clearToken() {
+            localStorage.removeItem('grip-invest-token');
+            document.getElementById('tokenResult').innerHTML = '<div class="success">✅ Token cleared</div>';
+        }
+
+        // Check token on page load
+        checkToken();
+    </script>
+</body>
+</html>

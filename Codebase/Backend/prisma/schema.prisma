@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(uuid()) @db.Char(36) @map("id")
+  firstName      String    @map("first_name")
+  lastName       String?   @map("last_name")
+  email          String    @unique @map("email")
+  passwordHash   String    @map("password_hash")
+  phone          String?   @map("phone")
+  riskAppetite   RiskAppetite @default(moderate) @map("risk_appetite")
+  investmentGoal String?   @map("investment_goal")
+  monthlyInvestment Decimal? @map("monthly_investment")
+  twoFactorSecret String?  @map("two_factor_secret")
+  twoFactorEnabled Boolean @default(false) @map("two_factor_enabled")
+  preferences    String?   @map("preferences")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  investments    Investment[]
+  logs           TransactionLog[]
+
+  @@map("users")
+}
+
+model InvestmentProduct {
+  id             String    @id @default(uuid()) @db.Char(36)
+  name           String
+  investmentType InvestmentType @map("investment_type")
+  tenureMonths   Int       @map("tenure_months")
+  annualYield    Decimal   @map("annual_yield")
+  riskLevel      RiskLevel @map("risk_level")
+  minInvestment  Decimal   @default(500.00) @map("min_investment")
+  maxInvestment  Decimal?  @map("max_investment")
+  description    String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  investments    Investment[]
+
+  @@map("investment_products")
+}
+
+model Investment {
+  id            String    @id @default(uuid()) @db.Char(36)
+  userId        String    @db.Char(36) @map("user_id")
+  productId     String    @db.Char(36) @map("product_id")
+  amount        Decimal
+  investedAt    DateTime  @default(now()) @map("invested_at")
+  status        InvestmentStatus @default(active)
+  expectedReturn Decimal?  @map("expected_return")
+  maturityDate  DateTime?  @map("maturity_date")
+  user          User       @relation(fields: [userId], references: [id])
+  product       InvestmentProduct @relation(fields: [productId], references: [id])
+
+  @@map("investments")
+}
+
+model TransactionLog {
+  id           BigInt    @id @default(autoincrement())
+  userId       String?   @db.Char(36) @map("user_id")
+  email        String?   @map("email")
+  endpoint     String
+  httpMethod   HttpMethod @map("http_method")
+  statusCode   Int        @map("status_code")
+  errorMessage String?    @map("error_message")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  user         User?      @relation(fields: [userId], references: [id])
+
+  @@map("transaction_logs")
+}
+
+enum RiskAppetite {
+  low
+  moderate
+  high
+}
+
+enum InvestmentType {
+  bond
+  fd
+  mf
+  etf
+  other
+}
+
+enum RiskLevel {
+  low
+  moderate
+  high
+}
+
+enum InvestmentStatus {
+  active
+  matured
+  cancelled
+}
+
+enum HttpMethod {
+  GET
+  POST
+  PUT
+  DELETE
+}
